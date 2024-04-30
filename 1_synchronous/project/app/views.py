@@ -8,6 +8,11 @@ import base64
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 import time
+from pathlib import Path
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
+resnet_path = BASE_DIR / "resnet.onnx"
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -45,7 +50,7 @@ class EncodingView(View):
         image = image.transpose((2, 0, 1))
         image = np.expand_dims(image, axis=0)
 
-        model = ort.InferenceSession("resnet.onnx")
+        model = ort.InferenceSession(resnet_path)
         output_bytes = model.run(None, {"data": image})[0].tobytes()
         output_base64 = base64.b64encode(output_bytes).decode("utf-8")
 
